@@ -1,0 +1,6 @@
+﻿  conjugue.c
+C:\Users\domma\source\repos\DJJ\conjugue.c(199,9): warning C4047: 'inicializando': 'MYSQL *' difere em níveis de indireção de 'MYSQL *(__cdecl *)(void)'
+  djj.c
+  proprietario.c
+  Gerando Código...
+  DJJ.vcxproj -> C:\Users\domma\source\repos\DJJ\x64\Debug\DJJ.exe
