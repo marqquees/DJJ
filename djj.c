@@ -1,17 +1,20 @@
 //Bibliotecas Proprietarias.
 #include "djj.h"
 #include "proprietario.h"
-#include "conjugue.h"
+#include "conjuge.h"
 
 int main(void)
 {
-    menu();
+	// Define a localização para Português de Portugal.
+	setlocale(LC_ALL, "Portuguese_Portugal.1252");
+
+    menu_principal();
     return 0;
 }
 
-int menu(void)
+int menu_principal(void)
 {
-    conexao_mysql();
+    //conexao_mysql();
 
     int opcao = 0;
     do
@@ -34,7 +37,7 @@ int menu(void)
             break;
         case 2:
 			limpa_ecra();
-            menu_conjugue();
+            menu_conjuge();
             break;
         default:
             puts("Opcao invalida! Digite novamente.");
@@ -62,6 +65,17 @@ MYSQL* conexao_mysql(void)
     }
 
     return conexao;
+}
+
+void enter_para_continuar(void)
+{
+    puts("\n\nPressione Enter para continuar...");
+    // Limpa o buffer de entrada.
+    while (getchar() != '\n');
+    // Espera pelo Enter.
+    getchar();
+
+    limpa_ecra();
 }
 
 void limpa_ecra()

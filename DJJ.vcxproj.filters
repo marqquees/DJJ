@@ -18,7 +18,7 @@
     <ClCompile Include="proprietario.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
-    <ClCompile Include="conjugue.c">
+    <ClCompile Include="conjuge.c">
       <Filter>Arquivos de Origem</Filter>
     </ClCompile>
     <ClCompile Include="djj.c">
@@ -34,7 +34,7 @@
     <ClInclude Include="djj.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
-    <ClInclude Include="conjugue.h">
+    <ClInclude Include="conjuge.h">
       <Filter>Arquivos de Cabeçalho</Filter>
     </ClInclude>
     <ClInclude Include="proprietario.h">
