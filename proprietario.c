@@ -2,19 +2,15 @@
 #include "djj.h"
 #include "proprietario.h"
 
-// Variáveis Globais.
-MYSQL* conexao;
-int nif_proprietario = 0;
-
 int menu_proprietario(void)
 {
 	int opcao = 0;
 
-	puts("Menu Proprietario\n");
-    puts("1. Adicionar um Novo Proprietario");
-    puts("2. Alterar os Dados do Proprietario");
-    puts("3. Listar os Dados do Proprietario");
-    puts("4. Remover os Dados do Proprietario");
+	puts("Menu Proprietário\n");
+    puts("1. Adicionar um Novo Proprietário");
+    puts("2. Alterar os Dados do Proprietário");
+    puts("3. Listar os Dados do Proprietário");
+    puts("4. Remover os Dados do Proprietário");
 	puts("5. Voltar ao Menu Principal");
     puts("6. Sair");
     printf("\nOpcao: ");
@@ -40,7 +36,7 @@ int menu_proprietario(void)
         break;
 	case 5:
 		limpa_ecra();
-		menu();
+		menu_principal();
 		break;
     case 6:
         sair();
@@ -54,58 +50,90 @@ int menu_proprietario(void)
 
 void adicionar_proprietario(void)
 {
-    // Dados do Proprietario.
-    int nif_proprietario = 0;
-    char nome_proprietario[255];
-    char telefone_proprietario[15];
-    char email_proprietario[255];
+	// Dados do Proprietario.
+	int nif_proprietario = 0;
+	char nome_proprietario[255] = { "0" };
+	char telefone_proprietario[15] = { "0" };
+	char email_proprietario[255] = { "0" };
 
-	// Dado do Conjugue.
-	int nif_conjugue = 0;
+	// Dados do Cônjuge.
+	int nif_conjuge = 0;
+	char nome_conjuge[255] = { "0" };
+	char telefone_conjuge[15] = { "0" };
+	char email_conjuge[255] = { "0" };
 
-    puts("Adicionar um Novo Proprietario\n");
-    printf("NIF do Proprietario: ");
-    scanf_s("%d", &nif_proprietario);
-    printf("Nome do Proprietario: ");
-    scanf_s("%s", nome_proprietario, 255);
-    printf("Telefone do Proprietario: ");
-    scanf_s("%s", telefone_proprietario, 15);
-    printf("Email do Proprietario: ");
-    scanf_s("%s", email_proprietario, 255);
-	printf("NIF do Conjugue: ");
-	scanf_s("%d", &nif_conjugue);
+	char tem_conjuge = '0';
 
-    conexao = conexao_mysql();
+	puts("Adicionar um Novo Proprietário\n");
+	printf("NIF do Proprietário: ");
+	scanf_s("%d", &nif_proprietario);
+	printf("Nome do Proprietário: ");
+	scanf_s("%s", nome_proprietario, 255);
+	printf("Telefone do Proprietário: ");
+	scanf_s("%s", telefone_proprietario, 15);
+	printf("Email do Proprietário: ");
+	scanf_s("%s", email_proprietario, 255);
 
-    // Adicionar os Dados do Proprietario.
-    char consulta_proprietario[1024];
-    snprintf(consulta_proprietario, sizeof(consulta_proprietario),
-        "INSERT INTO proprietario (NIF, Nome, Telefone, Email, NIFConjugue) VALUES (%d, '%s', '%s', '%s', %d)",
-        nif_proprietario, nome_proprietario, telefone_proprietario, email_proprietario, nif_conjugue);
+	printf("O Proprietário tem Cônjuge? (S/N): ");
+	scanf_s(" %c", &tem_conjuge, 1);
 
-    //Executa a Consulta do Proprietario.
-    if (mysql_query(conexao, consulta_proprietario))
-    {
-        fprintf(stderr, "\nErro ao executar a consulta na entidade Proprietario: %s", mysql_error(conexao));
-		mysql_close(conexao);
-        exit(EXIT_FAILURE);
-    }
-    puts("\nDados do Proprietario adicionados com Sucesso!");
+	char consulta_conjuge[1024] = { "0" };
+	char consulta_proprietario[1024] = { "0" };
 
-    // Fecha a Conexão.
-    mysql_close(conexao);
+	if (tem_conjuge == 'S' || tem_conjuge == 's')
+	{
+		printf("NIF do Cônjuge: ");
+		scanf_s("%d", &nif_conjuge);
+		printf("Nome do Cônjuge: ");
+		scanf_s("%s", nome_conjuge, 255);
+		printf("Telefone do Cônjuge: ");
+		scanf_s("%s", telefone_conjuge, 15);
+		printf("Email do Cônjuge: ");
+		scanf_s("%s", email_conjuge, 255);
+
+		// Adicionar os Dados do Conjuge.
+		snprintf(consulta_conjuge, sizeof(consulta_conjuge),
+			"INSERT INTO conjuge (NIF, Nome, Telefone, Email) VALUES (%d, '%s', '%s', '%s')",
+			nif_conjuge, nome_conjuge, telefone_conjuge, email_conjuge);
+
+		// Adicionar os Dados do Proprietario.
+		snprintf(consulta_proprietario, sizeof(consulta_proprietario),
+			"INSERT INTO proprietario (NIF, Nome, Telefone, Email, NIFConjuge) VALUES (%d, '%s', '%s', '%s', '%d')",
+			nif_proprietario, nome_proprietario, telefone_proprietario, email_proprietario, nif_conjuge);
+	}
+
+	// Adicionar os Dados do Proprietario.
+	snprintf(consulta_proprietario, sizeof(consulta_proprietario),
+		"INSERT INTO proprietario (NIF, Nome, Telefone, Email) VALUES (%d, '%s', '%s', '%s')",
+		nif_proprietario, nome_proprietario, telefone_proprietario, email_proprietario);
+
+	// Executa a Consulta.
+	if (tem_conjuge == 'S' || tem_conjuge == 's')
+	{
+		if (consulta_dado_conjuge(consulta_conjuge, nif_conjuge) == 0)
+			printf("\nOs Dados do Cônjuge %d foram adicionados.", nif_conjuge);
+		else
+			printf("\nErro ao adicionar os Dados do Cônjuge %d.", nif_conjuge);
+	}
+
+	// Executa a Consulta.
+	if (consulta_dado_proprietario(consulta_proprietario, nif_proprietario) == 0)
+		printf("\nOs Dados do Proprietário %d foram adicionados.", nif_proprietario);
+	else
+		printf("\nErro ao adicionar os Dados do Proprietário %d.", nif_proprietario);
 }
 
 void alterar_proprietario(void)
 {
 	int opcao = 0;
 
-    puts("Alterar Proprietario\n");
-	puts("Qual informacao deseja alterar?");
-	puts("1. Nome do Proprietario");
-	puts("2. Telefone do Proprietario");
-	puts("3. Email do Proprietario");
-	puts("4. Sair");
+    puts("Alterar Dados do Proprietário\n");
+	puts("Que informação deseja alterar?");
+	puts("1. Nome do Proprietário");
+	puts("2. Telefone do Proprietário");
+	puts("3. Email do Proprietário");
+	puts("4. Voltar ao Menu Proprietário");
+	puts("5. Sair");
 	printf("\nOpcao: ");
 	scanf_s("%d", &opcao);
 
@@ -114,14 +142,23 @@ void alterar_proprietario(void)
 	case 1:
 		limpa_ecra();
 		alterar_nome_proprietario();
+		enter_para_continuar();
 		break;
 	case 2:
+		limpa_ecra();
 		alterar_telefone_proprietario();
+		enter_para_continuar();
 		break;
 	case 3:
+		limpa_ecra();
 		alterar_email_proprietario();
+		enter_para_continuar();
 		break;
 	case 4:
+		limpa_ecra();
+		menu_proprietario();
+		break;
+	case 5:
 		sair();
 		break;
 	default:
@@ -132,105 +169,87 @@ void alterar_proprietario(void)
 
 void alterar_nome_proprietario(void)
 {
+	int nif_proprietario = 0;
     char nome_proprietario[255] = {"0"};
 
-	puts("Alterar Nome do Proprietario\n");
-	printf("NIF do Proprietario: ");
+	puts("Alterar o Nome do Proprietário\n");
+	printf("NIF do Proprietário: ");
 	scanf_s("%d", &nif_proprietario);
-	printf("(Novo) Nome do Proprietario: ");
+	printf("(Atual) Nome do Proprietário: ");
 	scanf_s("%s", nome_proprietario, 255);
+	
+	// Consulta SQL.
+	char consulta[1024] = {"0"};
+	snprintf(consulta, sizeof(consulta), "UPDATE proprietario SET Nome = '%s' WHERE NIF = %d", 
+		nome_proprietario, nif_proprietario);
 
-	// Conectar ao Banco de Dados.
-	conexao = conexao_mysql();
-
-	// Consulta SQL para alterar o Nome do Proprietario.
-	char consulta[1024];
-	snprintf(consulta, sizeof(consulta), "UPDATE proprietario SET Nome = '%s' WHERE NIF = %d", nome_proprietario, nif_proprietario);
-
-	//Executa a Consulta.
-	if (mysql_query(conexao, consulta))
-	{
-		fprintf(stderr, "Erro ao executar a consulta: %s\n", mysql_error(conexao));
-		mysql_close(conexao);
-		exit(EXIT_FAILURE);
-	}
-	puts("\nNome do Proprietario alterado com Sucesso!");
-
-	// Fecha a Conexão.
-	mysql_close(conexao);
+	if (consulta_dado_proprietario(consulta, nif_proprietario) == 0)
+		printf("\nO Nome do Proprietário %d foi atualizado.", nif_proprietario);
+	else
+		printf("\nErro ao atualizar o Nome do Proprietário %d.", nif_proprietario);
 }
 
 void alterar_telefone_proprietario(void)
 {
+	int nif_proprietario = 0;
 	char telefone_proprietario[15] = {"0"};
 
-	puts("Alterar Telefone do Proprietario\n");
-	printf("NIF do Proprietario: ");
+	puts("Alterar o Telefone do Proprietário\n");
+	printf("NIF do Proprietário: ");
 	scanf_s("%d", &nif_proprietario);
-	printf("(Novo) Telefone do Proprietario: ");
+	printf("(Atual) Telefone do Proprietário: ");
 	scanf_s("%s", telefone_proprietario, 15);
 
-	// Conectar ao Banco de Dados.
-	conexao = conexao_mysql();
-
-	// Consulta SQL para alterar o Telefone do Proprietario.
-	char consulta[1024];
+	// Consulta SQL.
+	char consulta[1024] = {"0"};
 	snprintf(consulta, sizeof(consulta), "UPDATE proprietario SET Telefone = '%s' WHERE NIF = %d", telefone_proprietario, nif_proprietario);
 
-	//Executa a Consulta.
-	if (mysql_query(conexao, consulta))
-	{
-		fprintf(stderr, "Erro ao executar a consulta: %s\n", mysql_error(conexao));
-		mysql_close(conexao);
-		exit(EXIT_FAILURE);
-	}
-	puts("\nTelefone do Proprietario alterado com Sucesso!");
-
-	// Fecha a Conexão.
-	mysql_close(conexao);
+	if (consulta_dado_proprietario(consulta, nif_proprietario) == 0)
+		printf("Telefone do Proprietário %d foi atualizado.", nif_proprietario);
+	else
+		printf("Erro ao atualizar o Telefone do Proprietário %d.", nif_proprietario);
 }
 
 void alterar_email_proprietario(void)
 {
+	int nif_proprietario = 0;
 	char email_proprietario[255] = {"0"};
 
-	puts("Alterar Email do Proprietario\n");
-	printf("NIF do Proprietario: ");
+	puts("Alterar o Email do Proprietário\n");
+	printf("NIF do Proprietário: ");
 	scanf_s("%d", &nif_proprietario);
-	printf("(Novo) Email do Proprietario: ");
+	printf("(Atual) Email do Proprietário: ");
 	scanf_s("%s", email_proprietario, 255);
 
-	// Conectar ao Banco de Dados.
-	conexao = conexao_mysql();
-	// Consulta SQL para alterar o Email do Proprietario.
-	char consulta[1024];
-	snprintf(consulta, sizeof(consulta), "UPDATE proprietario SET Email = '%s' WHERE NIF = %d", email_proprietario, nif_proprietario);
+	// Consulta SQL.
+	char consulta[1024] = {"0"};
+	snprintf(consulta, sizeof(consulta), "UPDATE proprietario SET Email = '%s' WHERE NIF = %d",
+		email_proprietario, nif_proprietario);
 
-	//Executa a Consulta.
-	if (mysql_query(conexao, consulta))
-	{
-		fprintf(stderr, "Erro ao executar a consulta: %s\n", mysql_error(conexao));
-		mysql_close(conexao);
-		exit(EXIT_FAILURE);
-	}
-	puts("\nEmail do Proprietario alterado com Sucesso!");
-
-	// Fecha a Conexão.
-	mysql_close(conexao);
+	if (consulta_dado_proprietario(consulta, nif_proprietario) == 0)
+		printf("O Email do Proprietário %d foi atualizado.", nif_proprietario);
+	else
+		printf("Erro ao atualizar o Email do Proprietário %d.", nif_proprietario);
 }
 
 void listar_proprietario(void)
 {
-    puts("Listar Proprietario\n");
-    printf("NIF do Proprietario: ");
+	int nif_proprietario = 0;
+
+    puts("Listar Todos os Dados do Proprietário\n");
+    printf("NIF do Proprietário: ");
     scanf_s("%d", &nif_proprietario);
 
     // Conectar ao Banco de Dados.
-    conexao = conexao_mysql();
+    MYSQL* conexao = conexao_mysql();
 
     // Consulta SQL para listar os Proprietarios.
-    char consulta[1024];
-    snprintf(consulta, sizeof(consulta), "SELECT * FROM proprietario WHERE NIF = %d", nif_proprietario);
+	char consulta[1024] = {"0"};
+	snprintf(consulta, sizeof(consulta),
+		"SELECT p.NIF, p.Nome, p.Telefone, p.Email, p.NIFConjuge, c.Nome AS NomeConjuge, c.Telefone AS TelefoneConjuge, c.Email AS EmailConjuge "
+		"FROM proprietario p "
+		"LEFT JOIN conjuge c ON p.NIFConjuge = c.NIF "
+		"WHERE p.NIF = %d", nif_proprietario);
 
     //Executa a Consulta.
     if (mysql_query(conexao, consulta))
@@ -252,12 +271,12 @@ void listar_proprietario(void)
     int numero_campos = mysql_num_fields(dados_consulta);
 
     // Obter o número de linhas no resultado.
-    MYSQL_ROW linha;
+    MYSQL_ROW linha = 0;
     while (linha = mysql_fetch_row(dados_consulta))
     {
         for (int i = 0; i < numero_campos; i++)
         {
-			//Nome do campo.
+			//Nomes dos campos.
 			if (i == 0)
 				printf("NIF: %s", linha[i]);
 			else if (i == 1)
@@ -267,7 +286,13 @@ void listar_proprietario(void)
 			else if (i == 3)
 				printf("\nEmail: %s", linha[i]);
 			else if (i == 4)
-				printf("\nNIFConjugue: %s", linha[i]);
+				printf("\nNIF do Cônjuge: %s", linha[i]);
+			else if (i == 5)
+				printf("\nNome do Cônjuge: %s", linha[i]);
+			else if (i == 6)
+				printf("\nTelefone do Cônjuge: %s", linha[i]);
+			else if (i == 7)
+				printf("\nEmail do Cônjuge: %s", linha[i]);
 			else
 				puts("\nNULL");
         }
@@ -282,26 +307,48 @@ void listar_proprietario(void)
 
 void remover_proprietario(void)
 {
-    puts("Remover Proprietario\n");
-    printf("NIF do Proprietario: ");
+	int nif_proprietario = 0;
+
+    puts("Remover Todos os Dados do Proprietário\n");
+    printf("NIF do Proprietário: ");
     scanf_s("%d", &nif_proprietario);
 
-    // Conectar ao Banco de Dados.
-    conexao = conexao_mysql();
+    // Consulta SQL.
+	char consulta[1024] = { "0" };
+    snprintf(consulta, sizeof(consulta), "DELETE FROM proprietario WHERE NIF = %d", nif_proprietario);
 
-    // Remover os Dados do Proprietario.
-    char consulta_proprietario[1024];
-    snprintf(consulta_proprietario, sizeof(consulta_proprietario), "DELETE FROM proprietario WHERE NIF = %d", nif_proprietario);
+	if (consulta_dado_proprietario(consulta, nif_proprietario) == 0)
+		printf("Os Dados do Proprietário %d foram removidos.", nif_proprietario);
+	else
+		printf("Erro ao remover os Dados do Proprietário %d.", nif_proprietario);
+}
 
-    //Executa a Consulta do Proprietario.
-    if (mysql_query(conexao, consulta_proprietario))
-    {
-        fprintf(stderr, "\nErro ao executar a consulta na entidade Proprietario: %s", mysql_error(conexao));
+int consulta_dado_proprietario(char consulta[1024], int nif_proprietario)
+{
+	// Conectar ao Banco de Dados.
+	MYSQL* conexao = conexao_mysql();
+
+	// Consulta SQL.
+	snprintf("0", 0, consulta, nif_proprietario);
+
+	// Executa a Consulta.
+	if (mysql_query(conexao, consulta))
+	{
+		fprintf(stderr, "\nErro ao executar a consulta: %s\n", mysql_error(conexao));
 		mysql_close(conexao);
-        exit(EXIT_FAILURE);
-    }
-    puts("\nDados do Proprietario removidos com Sucesso!");
+		return 1;
+	}
 
-    // Fecha a Conexão.
-    mysql_close(conexao);
+	//Verificar o número de linhas afetadas.
+	if (mysql_affected_rows(conexao) == 0)
+	{
+		fprintf(stderr, "\nNenhum registro encontrado associado ao NIF %d.\n", nif_proprietario);
+		mysql_close(conexao);
+		return 1;
+	}
+
+	// Fecha a Conexão.
+	mysql_close(conexao);
+
+	return 0;
 }

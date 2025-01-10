@@ -130,7 +130,7 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="conjugue.c" />
+    <ClCompile Include="conjuge.c" />
     <ClCompile Include="djj.c" />
     <ClCompile Include="proprietario.c" />
   </ItemGroup>
@@ -138,7 +138,7 @@
     <None Include="imobiliaria.sql" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="conjugue.h" />
+    <ClInclude Include="conjuge.h" />
     <ClInclude Include="djj.h" />
     <ClInclude Include="proprietario.h" />
   </ItemGroup>
